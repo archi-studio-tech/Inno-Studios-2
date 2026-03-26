@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovative Archytech Studios | Executive Architecture 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent-gold: #d4af37; --bg-main: #080808; --card-bg: #111111; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: #ffffff; }
+        .font-sync { font-family: 'Syncopate', sans-serif; letter-spacing: 0.15em; }
+        .hero-bg { background-image: linear-gradient(to bottom, rgba(8,8,8,0.5), rgba(8,8,8,1)), url('https://images.unsplash.com/photo-1760340769739-653d00200baf?fm=jpg&q=80&w=2500'); background-size: cover; background-position: center; }
+        .brutalist-card { background: var(--card-bg); border: 1px solid #222; transition: all 0.5s; }
+        .glass-nav { background: rgba(8, 8, 8, 0.85); backdrop-filter: blur(25px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.99); z-index: 1000; align-items: center; justify-content: center; }
+        .slide-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); transition: 0.3s; }
+        .slide-btn:hover { background: rgba(255,255,255,0.9); color: black; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; }
+    </style>
+</head>
+<body class="antialiased font-light overflow-x-hidden">
+
+    <!-- Authentication Overlay -->
+    <div id="loginOverlay" class="overlay">
+        <div class="glass-nav p-16 text-center max-w-md mx-auto border border-white/10 shadow-2xl">
+            <h2 class="font-sync text-sm mb-12 italic tracking-tighter">STUDIO ACCESS</h2>
+            <input type="password" id="passInput" placeholder="STUDIO KEY" class="w-full p-5 bg-white/5 border border-white/10 text-[10px] mb-8 text-center outline-none text-white">
+            <div id="loginError" class="text-red-500 text-[8px] mb-6 uppercase hidden">Access Denied</div>
+            <button onclick="attemptLogin()" class="w-full py-5 bg-white text-black text-[9px] font-bold uppercase hover:bg-gray-200">Authorize Session</button>
+            <button onclick="closeLogin()" class="mt-6 text-[8px] text-gray-600 uppercase hover:text-white">Public Site</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav py-6 px-12 flex justify-between items-center">
+        <!-- Dynamic Brand Logo Container -->
+        <div id="navBrand" class="font-sync text-sm font-bold tracking-tighter flex items-center h-10">
+            I / A STUDIOS
+        </div>
+        <div class="flex items-center gap-8">
+            <a href="#spaces" class="text-[8px] uppercase tracking-[0.3em] hover:text-[#d4af37] transition hidden md:block mt-1">Portfolio</a>
+            <div id="adminBadge" onclick="showLogin()" class="text-[8px] cursor-pointer uppercase tracking-[0.3em] border border-white/5 px-6 py-3 hover:bg-white hover:text-black transition">Studio Login</div>
+        </div>
+    </nav>
+
+    <!-- Admin Panel -->
+    <section id="admin-panel" class="hidden py-40 px-12 md:px-24 border-b border-white/5 pt-48 bg-[#0a0a0a]">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="font-sync text-4xl font-bold italic mb-12 uppercase tracking-tighter">Production Oversight</h2>
+            
+            <div class="grid lg:grid-cols-2 gap-10 mb-16">
+                <!-- Device Asset Upload -->
+                <div class="brutalist-card p-12 border-t-2 border-[#d4af37]">
+                    <h4 class="font-sync text-[9px] italic text-[#d4af37] uppercase mb-6">Device Media Upload (Portfolio)</h4>
+                    <p class="text-[8px] text-gray-500 mb-8 leading-loose">Select images from your device. They will be pushed to the **Residential Category** slideshow below.</p>
+                    <input type="file" id="deviceUploader" accept="image/*" multiple class="hidden" onchange="handlePortfolioUpload(this)">
+                    <button onclick="document.getElementById('deviceUploader').click()" class="w-full py-4 bg-[#d4af37]/10 border border-[#d4af37]/40 text-[#d4af37] text-[8px] font-bold uppercase hover:bg-[#d4af37] hover:text-black transition">Browse Device Assets</button>
+                    <div id="uploadStatus" class="mt-4 text-[8px] text-green-500 uppercase tracking-widest hidden">Assets Injected Successfully</div>
+                </div>
+
+                <!-- Security Management -->
+                <div class="brutalist-card p-12 border-t-2 border-red-600">
+                    <h4 class="font-sync text-[9px] italic text-red-500 uppercase mb-6">Credential Management</h4>
+                    <p class="text-[8px] text-gray-500 mb-8 leading-loose">Rotate the Studio Key to revoke unauthorized access globally.</p>
+                    <input type="password" id="newPassInput" placeholder="NEW STUDIO KEY" class="w-full p-4 bg-black border border-white/5 text-[8px] mb-4 outline-none text-white">
+                    <button onclick="changePassword()" class="w-full py-4 bg-red-600/20 border border-red-600/40 text-red-400 text-[8px] font-bold uppercase hover:bg-red-600 hover:text-white transition">Update Security Key</button>
+                </div>
+
+                <!-- Brand / Logo Upload -->
+                <div class="brutalist-card p-12 border-t-2 border-purple-600">
+                    <h4 class="font-sync text-[9px] italic text-purple-400 uppercase mb-6">Brand Identity (Logo)</h4>
+                    <p class="text-[8px] text-gray-500 mb-8 leading-loose">Upload a transparent PNG/SVG to replace the navigation text logo.</p>
+                    <input type="file" id="logoUploader" accept="image/*" class="hidden" onchange="handleLogoUpload(this)">
+                    <button onclick="document.getElementById('logoUploader').click()" class="w-full py-4 bg-purple-600/20 border border-purple-600/40 text-purple-400 text-[8px] font-bold uppercase hover:bg-purple-600 hover:text-white transition">Upload Master Logo</button>
+                    <div id="logoStatus" class="mt-4 text-[8px] text-green-500 uppercase tracking-widest hidden">Brand Updated</div>
+                </div>
+
+                <!-- Social Media Configuration -->
+                <div class="brutalist-card p-12 border-t-2 border-blue-600">
+                    <h4 class="font-sync text-[9px] italic text-blue-400 uppercase mb-6">Social Intelligence</h4>
+                    <p class="text-[8px] text-gray-500 mb-8 leading-loose">Configure routing URLs for client contact points in the footer.</p>
+                    <input type="text" id="igInput" placeholder="INSTAGRAM URL" class="w-full p-4 bg-black border border-white/5 text-[8px] mb-4 outline-none text-white">
+                    <input type="text" id="liInput" placeholder="LINKEDIN URL" class="w-full p-4 bg-black border border-white/5 text-[8px] mb-4 outline-none text-white">
+                    <button onclick="saveSocials()" class="w-full py-4 bg-blue-600/20 border border-blue-600/40 text-blue-400 text-[8px] font-bold uppercase hover:bg-blue-600 hover:text-white transition">Synchronize Routing</button>
+                </div>
+            </div>
+            
+            <div class="text-right">
+                <button onclick="logout()" class="text-[8px] uppercase text-red-500/50 hover:text-red-500 tracking-widest font-bold">Terminate Session</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero -->
+    <header class="relative h-screen flex items-center justify-center hero-bg border-b border-white/5">
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="relative z-10 text-center px-6 max-w-7xl">
+            <span class="text-[10px] uppercase tracking-[0.8em] text-gray-400 mb-12 block">The Architecture of Performance</span>
+            <h1 class="font-sync text-4xl md:text-[8rem] font-bold mb-14 leading-[0.85] tracking-tighter">INNOVATIVE<br>ARCHYTECH</h1>
+            <p class="text-[9px] uppercase tracking-[0.5em] text-gray-500 mb-20 max-w-3xl mx-auto leading-relaxed">Systemic Urbanism • Vernacular Intelligence • Global 2026 Standards</p>
+        </div>
+    </header>
+
+    <!-- Interactive Portfolio Slideshows -->
+    <section id="spaces" class="py-48 px-12 bg-[#080808]">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="font-sync text-4xl font-bold mb-24 text-center italic uppercase tracking-tighter">CASE STUDIES</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                
+                <!-- Category 1: Residential -->
+                <div class="relative h-[600px] group border border-white/5 overflow-hidden">
+                    <img id="slide-res" src="https://images.unsplash.com/photo-1757359056339-22968344cce6?fm=jpg&w=1200" class="w-full h-full object-cover transition-all duration-700 brightness-75 group-hover:brightness-100 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-10 left-10 right-10 pointer-events-none">
+                        <span class="text-[7px] uppercase tracking-[0.8em] text-[#d4af37] mb-4 block">Residential</span>
+                        <h4 class="font-sync text-sm uppercase mb-4">Maseru Heights</h4>
+                        <span id="counter-res" class="text-[8px] font-mono text-gray-400 bg-black/50 px-3 py-1 border border-white/10">01 / 03</span>
+                    </div>
+                    <!-- Navigation -->
+                    <button onclick="changeSlide('res', -1)" class="absolute top-1/2 left-4 -translate-y-1/2 slide-btn w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 z-10">❮</button>
+                    <button onclick="changeSlide('res', 1)" class="absolute top-1/2 right-4 -translate-y-1/2 slide-btn w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 z-10">❯</button>
+                </div>
+
+                <!-- Category 2: Hydro -->
+                <div class="relative h-[600px] group border border-white/5 overflow-hidden">
+                    <img id="slide-hydro" src="https://images.unsplash.com/photo-1769321498497-9bee907666da?fm=jpg&w=1200" class="w-full h-full object-cover transition-all duration-700 brightness-75 group-hover:brightness-100 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-10 left-10 right-10 pointer-events-none">
+                        <span class="text-[7px] uppercase tracking-[0.8em] text-blue-500 mb-4 block">Hydro-Resilience</span>
+                        <h4 class="font-sync text-sm uppercase mb-4">Artificial Falls</h4>
+                        <span id="counter-hydro" class="text-[8px] font-mono text-gray-400 bg-black/50 px-3 py-1 border border-white/10">01 / 02</span>
+                    </div>
+                    <!-- Navigation -->
+                    <button onclick="changeSlide('hydro', -1)" class="absolute top-1/2 left-4 -translate-y-1/2 slide-btn w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 z-10">❮</button>
+                    <button onclick="changeSlide('hydro', 1)" class="absolute top-1/2 right-4 -translate-y-1/2 slide-btn w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 z-10">❯</button>
+                </div>
+
+                <!-- Category 3: Biophilic -->
+                <div class="relative h-[600px] group border border-white/5 overflow-hidden">
+                    <img id="slide-bio" src="https://images.unsplash.com/photo-1720442812020-8c2c74f13047?fm=jpg&w=1200" class="w-full h-full object-cover transition-all duration-700 brightness-75 group-hover:brightness-100 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-10 left-10 right-10 pointer-events-none">
+                        <span class="text-[7px] uppercase tracking-[0.8em] text-green-500 mb-4 block">Biophilic Hub</span>
+                        <h4 class="font-sync text-sm uppercase mb-4">Forest Narrative</h4>
+                        <span id="counter-bio" class="text-[8px] font-mono text-gray-400 bg-black/50 px-3 py-1 border border-white/10">01 / 03</span>
+                    </div>
+                    <!-- Navigation -->
+                    <button onclick="changeSlide('bio', -1)" class="absolute top-1/2 left-4 -translate-y-1/2 slide-btn w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 z-10">❮</button>
+                    <button onclick="changeSlide('bio', 1)" class="absolute top-1/2 right-4 -translate-y-1/2 slide-btn w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 z-10">❯</button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Client Contact -->
+    <footer class="py-32 px-12 border-t border-white/5 bg-[#050505]">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+            <div>
+                <h3 class="font-sync text-xl italic tracking-tighter mb-4">I / A STUDIOS</h3>
+                <p class="text-[7px] text-gray-600 uppercase tracking-[0.6em]">Maseru, Lesotho • Global Executive Standards</p>
+            </div>
+            
+            <!-- Dynamic Social Links -->
+            <div id="socialLinksContainer" class="flex gap-8 text-[8px] uppercase tracking-widest text-gray-400">
+                <!-- Populated via Javascript -->
+            </div>
+            
+            <p class="text-[7px] text-gray-800 uppercase tracking-[0.8em]">© 2026 ARCHYTECH</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. CORE SECURITY LOGIC ---
+        let studioKey = localStorage.getItem('studioKey') || 'admin123';
+        let isLoggedIn = false;
+
+        function showLogin() { document.getElementById('loginOverlay').style.display = 'flex'; }
+        function closeLogin() { document.getElementById('loginOverlay').style.display = 'none'; }
+
+        function attemptLogin() {
+            const input = document.getElementById('passInput');
+            if (input.value === studioKey) { 
+                isLoggedIn = true; 
+                updateUIPrivileges(); 
+                closeLogin(); 
+                input.value = '';
+            } else { 
+                document.getElementById('loginError').classList.remove('hidden'); 
+            }
+        }
+
+        function changePassword() {
+            const newKey = document.getElementById('newPassInput').value;
+            if (newKey.length < 4) { alert("Security Error: Minimum 4 characters required."); return; }
+            studioKey = newKey;
+            localStorage.setItem('studioKey', newKey);
+            alert("Security Protocol: Key Rotated.");
+            document.getElementById('newPassInput').value = '';
+        }
+
+        function updateUIPrivileges() {
+            const adminPanel = document.getElementById('admin-panel');
+            const badge = document.getElementById('adminBadge');
+            if (isLoggedIn) {
+                adminPanel.classList.remove('hidden'); 
+                badge.innerText = 'Authenticated';
+                badge.classList.add('text-[#d4af37]');
+                window.scrollTo(0, 0);
+            } else {
+                adminPanel.classList.add('hidden'); 
+                badge.innerText = 'Studio Login';
+                badge.classList.remove('text-[#d4af37]');
+            }
+        }
+
+        function logout() { 
+            isLoggedIn = false; 
+            updateUIPrivileges(); 
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        // --- 2. DYNAMIC BRANDING (LOGO) ---
+        function handleLogoUpload(input) {
+            const file = input.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const dataUrl = e.target.result;
+                    localStorage.setItem('studioLogo', dataUrl);
+                    renderBrand();
+                    document.getElementById('logoStatus').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderBrand() {
+            const logoData = localStorage.getItem('studioLogo');
+            const container = document.getElementById('navBrand');
+            if(logoData) {
+                container.innerHTML = `<img src="${logoData}" alt="I/A Studios Logo" class="h-8 md:h-12 object-contain">`;
+            } else {
+                container.innerHTML = `I / A STUDIOS`;
+            }
+        }
+
+        // --- 3. SOCIAL MEDIA INTELLIGENCE ---
+        function saveSocials() {
+            const ig = document.getElementById('igInput').value;
+            const li = document.getElementById('liInput').value;
+            localStorage.setItem('studioSocials', JSON.stringify({ instagram: ig, linkedin: li }));
+            renderSocials();
+            alert("Social Routing Synchronized.");
+        }
+
+        function renderSocials() {
+            const data = JSON.parse(localStorage.getItem('studioSocials') || '{"instagram":"","linkedin":""}');
+            const container = document.getElementById('socialLinksContainer');
+            
+            // Populate Admin Inputs if they exist
+            if(document.getElementById('igInput')) document.getElementById('igInput').value = data.instagram || '';
+            if(document.getElementById('liInput')) document.getElementById('liInput').value = data.linkedin || '';
+
+            // Render Public Links
+            let html = '';
+            if(data.instagram) html += `<a href="${data.instagram}" target="_blank" class="hover:text-white transition border border-white/10 px-4 py-2 hover:bg-white/5">Instagram</a>`;
+            if(data.linkedin) html += `<a href="${data.linkedin}" target="_blank" class="hover:text-white transition border border-white/10 px-4 py-2 hover:bg-white/5">LinkedIn</a>`;
+            
+            if(!html) html = `<span>Client Connect: Offline</span>`;
+            container.innerHTML = html;
+        }
+
+        // --- 4. PORTFOLIO SLIDESHOW & UPLOAD ---
+        let portfolioSlides = {
+            res: [
+                'https://images.unsplash.com/photo-1757359056339-22968344cce6?fm=jpg&w=1200',
+                'https://images.unsplash.com/photo-1757524492552-d47a66a2b63e?fm=jpg&w=1200',
+                'https://images.unsplash.com/photo-1758565811430-3423f31396f9?fm=jpg&w=1200'
+            ],
+            hydro: [
+                'https://images.unsplash.com/photo-1769321498497-9bee907666da?fm=jpg&w=1200',
+                'https://images.unsplash.com/photo-1742818737678-1d9159ca43fc?fm=jpg&w=1200'
+            ],
+            bio: [
+                'https://images.unsplash.com/photo-1720442812020-8c2c74f13047?fm=jpg&w=1200',
+                'https://images.unsplash.com/photo-1754254465611-32596a0f79e2?fm=jpg&w=1200',
+                'https://images.unsplash.com/photo-1564605808007-8741d24a6a9c?fm=jpg&w=1200'
+            ]
+        };
+
+        // Load custom slides from localStorage if they exist
+        const storedResSlides = localStorage.getItem('customResSlides');
+        if(storedResSlides) {
+            portfolioSlides.res = JSON.parse(storedResSlides);
+        }
+
+        let currentIdx = { res: 0, hydro: 0, bio: 0 };
+
+        function updateSlideUI(category) {
+            const imgEl = document.getElementById(`slide-${category}`);
+            const counterEl = document.getElementById(`counter-${category}`);
+            const arr = portfolioSlides[category];
+            const idx = currentIdx[category];
+            
+            if(imgEl && arr.length > 0) {
+                imgEl.src = arr[idx];
+                let displayNum = (idx + 1).toString().padStart(2, '0');
+                let totalNum = arr.length.toString().padStart(2, '0');
+                counterEl.innerText = `${displayNum} / ${totalNum}`;
+            }
+        }
+
+        function changeSlide(category, direction) {
+            const max = portfolioSlides[category].length;
+            if(max === 0) return;
+            currentIdx[category] = (currentIdx[category] + direction + max) % max;
+            updateSlideUI(category);
+        }
+
+        function handlePortfolioUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+            
+            let filesProcessed = 0;
+            const status = document.getElementById('uploadStatus');
+            
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Push base64 string to Residential category for demonstration
+                    portfolioSlides.res.push(e.target.result);
+                    filesProcessed++;
+                    
+                    // Save to local storage once all are processed
+                    if(filesProcessed === input.files.length) {
+                        localStorage.setItem('customResSlides', JSON.stringify(portfolioSlides.res));
+                        updateSlideUI('res');
+                        status.classList.remove('hidden');
+                        setTimeout(() => status.classList.add('hidden'), 3000);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- INIT STATE ---
+        window.onload = function() {
+            renderBrand();
+            renderSocials();
+            updateSlideUI('res');
+            updateSlideUI('hydro');
+            updateSlideUI('bio');
+        };
+    </script>
+</body>
+</html>
